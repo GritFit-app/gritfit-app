@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Home, 
   Dumbbell, 
@@ -14,6 +14,7 @@ import Achievements from './components/Achievements';
 import ProgressPhotos from './components/ProgressPhotos';
 import PlateCalculator from './components/PlateCalculator';
 import ExerciseLibrary from './components/ExerciseLibrary';
+import AuthScreen from './components/AuthScreen';
 
 const Navigation = ({ activeTab, setActiveTab }) => {
   const navItems = [
@@ -55,7 +56,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
   );
 };
 
-const Dashboard = ({ setActiveTab }) => {
+const Dashboard = ({ setActiveTab, onLogout }) => {
   const [streak, setStreak] = useState(12);
   const [weeklyVolume, setWeeklyVolume] = useState(28500);
 
@@ -65,12 +66,25 @@ const Dashboard = ({ setActiveTab }) => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold gradient-text">GritFit</h1>
-          <p className="text-zinc-400 text-sm">Thursday, Feb 19</p>
+          <p className="text-zinc-400 text-sm">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
         </div>
-        <div className="flex items-center gap-2 bg-[#1a1a24] px-4 py-2 rounded-full border border-white/5">
-          <span className="text-2xl">🔥</span>
-          <span className="font-bold text-orange-500">{streak}</span>
-          <span className="text-zinc-400 text-sm">day streak</span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-[#1a1a24] px-4 py-2 rounded-full border border-white/5">
+            <span className="text-2xl">🔥</span>
+            <span className="font-bold text-orange-500">{streak}</span>
+            <span className="text-zinc-400 text-sm">day streak</span>
+          </div>
+          <button 
+            onClick={onLogout}
+            className="p-2 text-zinc-500 hover:text-white transition-colors"
+            title="Logout"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -298,10 +312,59 @@ const ToolMenuCard = ({ title, description, icon, color }) => (
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const authStatus = localStorage.getItem('gritfit_auth');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
+    setIsLoading(false);
+  }, []);
+
+  const handleLogin = (userData) => {
+    // Save auth status
+    localStorage.setItem('gritfit_auth', 'true');
+    localStorage.setItem('gritfit_user', JSON.stringify(userData));
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('gritfit_auth');
+    localStorage.removeItem('gritfit_user');
+    setIsAuthenticated(false);
+  };
+
+  // Show loading screen while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-black mb-4">
+            <span className="bg-gradient-to-r from-[#00f5d4] to-[#00d4ff] bg-clip-text text-transparent">
+              GRIT
+            </span>
+            <span className="text-white">FIT</span>
+          </h1>
+          <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden mx-auto">
+            <div className="h-full bg-gradient-to-r from-[#00d4ff] to-[#a855f7] animate-pulse" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth screen if not logged in
+  if (!isAuthenticated) {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
+
+  // Show main app if logged in
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
-      {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} />}
+      {activeTab === 'dashboard' && <Dashboard setActiveTab={setActiveTab} onLogout={handleLogout} />}
       {activeTab === 'workouts' && <Workouts />}
       {activeTab === 'progress' && <ProgressPhotos />}
       {activeTab === 'achievements' && <Achievements />}
