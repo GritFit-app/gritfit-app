@@ -58,7 +58,23 @@ const Navigation = ({ activeTab, setActiveTab }) => {
 
 const Dashboard = ({ setActiveTab, onLogout }) => {
   const [streak, setStreak] = useState(12);
-  const [weeklyVolume, setWeeklyVolume] = useState(28500);
+  const [weeklyVolumeKg, setWeeklyVolumeKg] = useState(12927); // ~28500 lbs in kg
+  const [weightUnit, setWeightUnit] = useState(() => {
+    return localStorage.getItem('gritfit_unit') || 'lbs';
+  });
+
+  const toggleUnit = () => {
+    const newUnit = weightUnit === 'kg' ? 'lbs' : 'kg';
+    setWeightUnit(newUnit);
+    localStorage.setItem('gritfit_unit', newUnit);
+  };
+
+  const displayWeight = (kg) => {
+    if (weightUnit === 'kg') {
+      return Math.round(kg).toLocaleString();
+    }
+    return Math.round(kg * 2.20462).toLocaleString();
+  };
 
   return (
     <div className="pb-24 px-6 pt-6 max-w-lg mx-auto">
@@ -91,14 +107,22 @@ const Dashboard = ({ setActiveTab, onLogout }) => {
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="stat-card">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-[#00d4ff]/10 rounded-lg">
-              <Activity size={20} className="text-[#00d4ff]" />
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#00d4ff]/10 rounded-lg">
+                <Activity size={20} className="text-[#00d4ff]" />
+              </div>
+              <span className="text-zinc-400 text-sm">Weekly Volume</span>
             </div>
-            <span className="text-zinc-400 text-sm">Weekly Volume</span>
+            <button 
+              onClick={toggleUnit}
+              className="px-2 py-1 text-xs bg-white/10 rounded-lg text-zinc-400 hover:text-white hover:bg-white/20 transition-colors"
+            >
+              {weightUnit === 'kg' ? 'kg → lbs' : 'lbs → kg'}
+            </button>
           </div>
-          <p className="text-2xl font-bold text-white">{weeklyVolume.toLocaleString()}</p>
-          <p className="text-xs text-zinc-500 mt-1">kg lifted</p>
+          <p className="text-2xl font-bold text-white">{displayWeight(weeklyVolumeKg)}</p>
+          <p className="text-xs text-zinc-500 mt-1">{weightUnit} lifted</p>
         </div>
 
         <div className="stat-card">
@@ -202,7 +226,7 @@ const Workouts = () => {
           name="Bench Press"
           sets="4"
           reps="8-12"
-          weight="225"
+          weightLbs="225"
           rpe="8"
           currentSet={activeSet}
           onRest={() => setTimerActive(true)}
@@ -211,21 +235,21 @@ const Workouts = () => {
           name="Incline Dumbbell Press"
           sets="3"
           reps="10-15"
-          weight="80"
+          weightLbs="80"
           rpe="9"
         />
         <ExerciseRow 
           name="Cable Flyes"
           sets="4"
           reps="12-20"
-          weight=""
+          weightLbs=""
           rpe="9"
         />
         <ExerciseRow 
           name="Lateral Raises"
           sets="4"
           reps="15-20"
-          weight="25"
+          weightLbs="25"
           rpe="10"
         />
       </div>
@@ -233,20 +257,31 @@ const Workouts = () => {
   );
 };
 
-const ExerciseRow = ({ name, sets, reps, weight, rpe, currentSet, onRest }) => (
-  <div className="exercise-card">
-    <div className="flex justify-between items-start mb-3">
-      <div>
-        <h3 className="font-bold text-white">{name}</h3>
-        <p className="text-zinc-500 text-sm">{sets} sets × {reps} reps @ RPE {rpe}</p>
-      </div>
-      {weight && (
-        <div className="text-right">
-          <p className="text-xl font-bold gradient-text">{weight}</p>
-          <p className="text-xs text-zinc-500">lbs</p>
+const ExerciseRow = ({ name, sets, reps, weightLbs, rpe, currentSet, onRest }) => {
+  const [weightUnit, setWeightUnit] = useState(() => localStorage.getItem('gritfit_unit') || 'lbs');
+
+  const displayWeight = (lbs) => {
+    if (!lbs) return null;
+    if (weightUnit === 'kg') {
+      return Math.round(lbs / 2.20462);
+    }
+    return lbs;
+  };
+
+  return (
+    <div className="exercise-card">
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <h3 className="font-bold text-white">{name}</h3>
+          <p className="text-zinc-500 text-sm">{sets} sets × {reps} reps @ RPE {rpe}</p>
         </div>
-      )}
-    </div>
+        {weightLbs && (
+          <div className="text-right">
+            <p className="text-xl font-bold gradient-text">{displayWeight(weightLbs)}</p>
+            <p className="text-xs text-zinc-500">{weightUnit}</p>
+          </div>
+        )}
+      </div>
     
     {/* Set Checkboxes */}
     <div className="flex gap-2">
@@ -266,8 +301,8 @@ const ExerciseRow = ({ name, sets, reps, weight, rpe, currentSet, onRest }) => (
         </button>
       ))}
     </div>
-  </div>
-);
+  );
+};
 
 const Tools = () => (
   <div className="pb-24 px-6 pt-6 max-w-lg mx-auto">
