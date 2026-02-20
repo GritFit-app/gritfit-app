@@ -2,16 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#0a0a0f" />
-    <meta name="description" content="GritFit - Modern Fitness Training App" />
+    <meta name="description" content="GritFit - The Ultimate AI-Powered Fitness Platform. Track workouts, analyze progress, join challenges, and train smarter." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     
-    <title>GritFit | Train Hard</title>
+    <title>GritFit | Train Smarter</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -21,6 +23,11 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      html {
+        scroll-behavior: smooth;
       }
       
       body {
@@ -28,6 +35,8 @@
         background: #0a0a0f;
         color: #ffffff;
         overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
       
       #root {
@@ -41,7 +50,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: #0a0a0f;
+        background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0a0a0f 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -50,39 +59,101 @@
       }
       
       .loading-logo {
-        font-size: 48px;
-        font-weight: 800;
-        background: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+        font-size: 56px;
+        font-weight: 900;
+        background: linear-gradient(135deg, #00f5d4 0%, #00d4ff 25%, #a855f7 75%, #f472b6 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        animation: pulse 2s infinite;
+        animation: logoPulse 2s ease-in-out infinite;
+        letter-spacing: -2px;
+      }
+      
+      .loading-tagline {
+        margin-top: 12px;
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 500;
+        letter-spacing: 3px;
+        text-transform: uppercase;
       }
       
       .loading-bar {
         width: 200px;
-        height: 4px;
-        background: #1a1a24;
-        border-radius: 2px;
-        margin-top: 24px;
+        height: 3px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        margin-top: 32px;
         overflow: hidden;
+        position: relative;
       }
       
       .loading-progress {
         height: 100%;
-        background: linear-gradient(90deg, #00d4ff, #a855f7);
-        border-radius: 2px;
-        animation: load 1.5s ease-out forwards;
+        background: linear-gradient(90deg, #00f5d4, #00d4ff, #a855f7);
+        border-radius: 3px;
+        animation: loadProgress 1.5s ease-out forwards;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
       }
       
-      @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.8; transform: scale(0.98); }
+      .loading-progress::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 1s infinite;
       }
       
-      @keyframes load {
+      @keyframes logoPulse {
+        0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+        50% { opacity: 0.9; transform: scale(0.98); filter: brightness(1.1); }
+      }
+      
+      @keyframes loadProgress {
         from { width: 0%; }
         to { width: 100%; }
+      }
+      
+      @keyframes shimmer {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(100%); }
+      }
+      
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: #0a0a0f;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: #374151;
+        border-radius: 3px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: #4b5563;
+      }
+      
+      /* Selection Color */
+      ::selection {
+        background: rgba(0, 212, 255, 0.3);
+        color: #ffffff;
+      }
+      
+      /* Safe area for notched devices */
+      .safe-area-top {
+        padding-top: env(safe-area-inset-top);
+      }
+      
+      .safe-area-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
       }
     </style>
   </head>
@@ -91,6 +162,7 @@
       <!-- Loading Screen -->
       <div class="loading-screen">
         <div class="loading-logo">GRITFIT</div>
+        <div class="loading-tagline">Train Smarter</div>
         <div class="loading-bar">
           <div class="loading-progress"></div>
         </div>
