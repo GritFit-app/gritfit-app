@@ -71,7 +71,7 @@ const StrongmanPage = ({ onUpgradeRequest }) => {
     );
   }
 
-  const implements = strongmanData.implements;
+  const strongmanImplements = strongmanData.implements;
   const medleys = strongmanData.medleys;
 
   // Tacky Timer Logic
@@ -114,7 +114,7 @@ const StrongmanPage = ({ onUpgradeRequest }) => {
 
   const renderImplements = () => (
     <div className="space-y-4">
-      {implements.slice(0, 8).map((imp) => (
+      {strongmanImplements.slice(0, 8).map((imp) => (
         <div key={imp.id} className="glass-card p-4">
           <h3 className="font-bold text-white mb-1">{imp.name}</h3>
           <p className="text-zinc-400 text-sm mb-3">{imp.description}</p>
